@@ -110,7 +110,7 @@
     <DirectoryRef Id="TARGETDIR">
       <!-- <Component Id="RegistryEntries" Guid="E46F73AB-9C11-4CC3-AF7B-D4D4BBECB5DB"> -->
       <Component Id="RegistryEntries" Guid="*">
-        <RegistryKey Root="HKCU" Key="Software\Classes\*\shell\Generate Download Link\command">
+        <RegistryKey Root="HKCU" Key="Software\Classes\*\shell\Generate download link\command">
           <RegistryValue Type="string" Value="&quot;[Bin]ctxdownloadlink.exe&quot; &quot;%1&quot;" />
         </RegistryKey>
       </Component>

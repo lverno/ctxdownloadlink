@@ -1,0 +1,17 @@
+[package]
+name = "ctxdownloadlink"
+version = "0.1.0"
+edition = "2021"
+authors = ["lverno"]
+
+[profile.release]
+strip = true
+lto = true
+panic = "abort"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+reqwest = { version = "0.11.10", features = ["blocking", "json", "multipart"] }
+serde = { version = "1.0.136", features = ["derive"] }
+winrt-notification = "0.5.1"
+clipboard-win = "4.4.1"

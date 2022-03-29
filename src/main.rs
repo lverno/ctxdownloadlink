@@ -1,10 +1,14 @@
-// Prevent terminal window from appearing
-#![windows_subsystem = "windows"]
+// Prevent terminal window from appearing (in release mode)
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod data;
+
+use data::ResponseData;
 use reqwest::blocking::{multipart::Form, Client};
-use serde::Deserialize;
+use std::time::Duration;
 use winrt_notification::Toast;
 
+/// Upload URL
 const URL: &str = "https://api.bayfiles.com/upload";
 
 /// Masquerade as PowerShell to avoid issues with toast notifications.
@@ -13,7 +17,7 @@ const APP_ID: &str = Toast::POWERSHELL_APP_ID;
 fn main() {
     if let Some(path) = std::env::args().nth(1) {
         // Create HTTP client and send POST request
-        let resp = Client::new()
+        let resp: ResponseData = Client::new()
             .post(URL)
             .multipart(
                 // Create form data with filepath
@@ -21,31 +25,28 @@ fn main() {
                     .file("file", path)
                     .unwrap_or_notify("Error: unable to read file"),
             )
+            // Disable timeout
+            .timeout(Duration::from_secs(999999))
             .send()
-            .unwrap_or_notify("Error: failed to send request. Check your internet connection.")
-            // Deserialize JSON response data
-            .json::<ResponseData>()
+            .unwrap_or_notify("Error: failed to upload file. Check your internet connection.")
+            // Deserialize the JSON data into ResponseData
+            .json()
             .unwrap_or_notify("Error: received invalid response");
 
         // Check response status
         if resp.status {
-            // Get the URL from the response data.
-            // Unwrapping is safe because if the status is true, there must be data.
-            let url = resp.data.unwrap().file.url.short;
-
+            // Get the URL from the response data
+            let url = resp.url();
             // Copy URL to clipboard and send notification
-            if clipboard_win::set_clipboard_string(&url).is_ok() {
-                notify2(&format!("Link copied to clipboard"), &url);
+            if clipboard_win::set_clipboard_string(url).is_ok() {
+                notify2("Link copied to clipboard", url);
             } else {
-                notify2(&url, "Could not copy link to clipboard");
+                notify2(url, "Could not copy link to clipboard");
             }
         } else {
             // Send an error notification with the error message provided by the response.
-            // Unwrapping is safe because if the status is false, there must be an error message.
-            notify(&format!("Error: {}", resp.error.unwrap().message));
+            notify(&format!("Error: {}", resp.err_msg()));
         }
-    } else {
-        eprintln!("no file path provided");
     }
 }
 
@@ -71,58 +72,4 @@ impl<T, E: std::error::Error> ResultExt<T> for Result<T, E> {
             panic!("{}", e);
         })
     }
-}
-
-/// Deserialization structs for JSON response data.
-#[derive(Deserialize)]
-struct ResponseData {
-    status: bool,
-    data: Option<_Data>,
-    error: Option<_Error>,
-}
-
-#[derive(Deserialize)]
-struct _Data {
-    file: _File,
-}
-
-#[derive(Deserialize)]
-struct _File {
-    url: _Url,
-    #[serde(skip_deserializing)]
-    _metadata: _Metadata,
-}
-
-#[derive(Deserialize)]
-struct _Url {
-    #[serde(skip_deserializing)]
-    _full: String,
-    short: String,
-}
-
-#[derive(Deserialize, Default)]
-struct _Metadata {
-    #[serde(skip_deserializing)]
-    _id: String,
-    #[serde(skip_deserializing)]
-    _name: String,
-    #[serde(skip_deserializing)]
-    _size: _Size,
-}
-
-#[derive(Deserialize, Default)]
-struct _Size {
-    #[serde(skip_deserializing)]
-    _bytes: u64,
-    #[serde(skip_deserializing)]
-    _readable: String,
-}
-
-#[derive(Deserialize)]
-struct _Error {
-    message: String,
-    #[serde(skip_deserializing)]
-    _kind: String,
-    #[serde(skip_deserializing)]
-    _code: i64,
 }

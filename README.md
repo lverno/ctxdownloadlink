@@ -20,8 +20,8 @@ There are no restrictions on downloads.
 ### Building the MSI installer
 
 1. Install the [WiX toolset](https://wixtoolset.org/). I recommend using [Scoop](https://scoop.sh/): `scoop install wixtoolset`. It will automatically install the latest version and add the binaries to your `Path`. Alternatively, download the WiX toolset from <https://wixtoolset.org/releases/> and add the `bin` folder to your `Path` manually.
-2. Install `cargo-wix`: run `cargo install cargo-wix`
+2. Install `cargo-wix`: `cargo install cargo-wix`
 3. Run `cargo wix` to build the installer (add the `--install` flag to run the installer after building).
 
 The installer will be created in `target/wix`.
-The installer can be customized by editing the `wix/main.wxs` file. See the [WiX toolset documentation](https://wixtoolset.org/documentation/).
+The installer can be customized by editing `wix/main.wxs`. See the [WiX toolset documentation](https://wixtoolset.org/documentation/).

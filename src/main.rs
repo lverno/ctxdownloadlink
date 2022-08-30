@@ -4,15 +4,12 @@
 mod data;
 
 use data::ResponseData;
+use notify_rust::Notification;
 use reqwest::blocking::{multipart::Form, Client};
 use std::time::Duration;
-use winrt_notification::Toast;
 
 /// Upload URL
 const URL: &str = "https://api.bayfiles.com/upload";
-
-/// Masquerade as PowerShell to avoid issues with toast notifications.
-const APP_ID: &str = Toast::POWERSHELL_APP_ID;
 
 fn main() {
     if let Some(path) = std::env::args().nth(1) {
@@ -52,12 +49,12 @@ fn main() {
 
 /// Send a toast notification with a message.
 fn notify(text: &str) {
-    let _ = Toast::new(APP_ID).title(text).show();
+    drop(Notification::new().body(text).show())
 }
 
 /// Send a toast notification with a title and a message.
 fn notify2(title: &str, text: &str) {
-    let _ = Toast::new(APP_ID).title(title).text1(text).show();
+    drop(Notification::new().summary(title).body(text).show())
 }
 
 /// Custom error handling extension method.

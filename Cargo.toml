@@ -13,5 +13,5 @@ panic = "abort"
 [dependencies]
 reqwest = { version = "0.11.10", features = ["blocking", "json", "multipart"] }
 serde = { version = "1.0.136", features = ["derive"] }
-winrt-notification = "0.5.1"
 clipboard-win = "4.4.1"
+notify-rust = "4.5.8"

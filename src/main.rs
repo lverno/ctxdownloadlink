@@ -62,6 +62,6 @@ fn main() {
 
 /// Send a toast notification with a title and a message, then exit with an exit code.
 fn notify_exit(title: &str, text: &str, code: i32) -> ! {
-    drop(Notification::new().summary(title).body(text).show());
+    let _ = Notification::new().summary(title).body(text).show();
     std::process::exit(code);
 }
